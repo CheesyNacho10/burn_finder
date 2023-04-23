@@ -1,7 +1,7 @@
 import cv2
 from pygrabber.dshow_graph import FilterGraph
 
-def list_cams():
+def GetActualListCams():
     """
     Test the ports and returns a tuple with the available ports and the ones that are working.
     """
@@ -20,3 +20,9 @@ def list_cams():
         dev_port +=1
     cams = [(devices_names[index], index) for index in working_cams]
     return cams
+
+def GetCameraInput(device_id):
+    """
+    Returns the camera input.
+    """
+    return cv2.VideoCapture(device_id)
