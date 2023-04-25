@@ -1,6 +1,7 @@
 import wx
 import wx.lib.statbmp as statbmp
 import frontend
+import backend
 
 class WholeFrame(wx.Frame):
 
@@ -9,8 +10,7 @@ class WholeFrame(wx.Frame):
         self.SetIcon(wx.Icon('./resources/icon.png'))
         self.SetSizeHints(800, 600)
 
-        # Variables
-        self.capture_stream = None
+        self.selected_file = None
 
         # Render timer
         self.render_timer = wx.Timer(self)
@@ -100,25 +100,9 @@ class WholeFrame(wx.Frame):
 
     def OnRenderTimer(self, event):
         if self.start_stop_camera_button.GetLabel() == 'Stop camera':
-            if self.capture_stream is None:
-                self.capture_stream = frontend.GetCameraInput(self.GetCameraIndex())
-            is_reading, frame = self.capture_stream.read()
-            if is_reading:
-                # Analize frame
-
-                frame = wx.Bitmap.FromBuffer(frame.shape[1], frame.shape[0], frame)
-                frame.SetSize((self.classification_preview.GetSize()))
-                self.classification_preview.SetBitmap(frame)
-                self.Layout()
-            else:
-                self.OnStartStopCamera()
-        elif self.select_file_button.IsEnabled() == False:
-            # Analize and show video
-            pass 
-        elif self.start_stop_camera_button.GetLabel() == 'Start camera':
-            if self.capture_stream is not None:
-                self.capture_stream.release()
-                self.capture_stream = None
+            backend.AnalyzeCam(self.GetCameraIndex(), 5, self.DisplayFrame)
+        elif self.select_file_button.GetLabel() == 'Stop file':
+            backend.AnalyzeVideo(self.selected_file, 5, self.DisplayFrame)
 
     def OnPreviewSizeChanged(self, event):
         if self.classification_preview.GetBitmap():
@@ -130,16 +114,18 @@ class WholeFrame(wx.Frame):
             self.start_stop_camera_button.SetLabel('Stop camera')
             self.select_file_button.Disable()
         else:
-            self.capture_stream = None
             self.start_stop_camera_button.SetLabel('Start camera')
             self.select_file_button.Enable()
 
     def OnSelectVideoFile(self, event):
-        file_path = wx.FileSelector('Select video file', wildcard='Video files (*.mp4;*.avi;*.mkv)|*.mp4;*.avi;*.mkv')
-        if file_path:
-            print(file_path)
-            self.start_stop_camera_button.Disable()
-            self.select_file_button.Disable()
+        if self.select_file_button.GetLabel() == 'Stop file':
+            self.start_stop_camera_button.Enable()
+            self.select_file_button.SetLabel('Select file')
+        else:
+            self.selected_file = wx.FileSelector('Select video file', wildcard='Video files (*.mp4;*.avi;*.mkv)|*.mp4;*.avi;*.mkv')
+            if self.selected_file:
+                self.start_stop_camera_button.Disable()
+                self.select_file_button.SetLabel('Stop file')
 
     # Helpers
     def GetCameraIndex(self):
@@ -147,6 +133,15 @@ class WholeFrame(wx.Frame):
             if item.IsChecked():
                 return item.device_id
         return -1
+
+    def DisplayFrame(self, rgb_frame):
+        frame = wx.Bitmap.FromBuffer(rgb_frame.shape[1], rgb_frame.shape[0], rgb_frame)
+        frame.SetSize((self.classification_preview.GetSize()))
+        self.classification_preview.SetBitmap(frame)
+        self.Layout()
+        wx.App.Get().Yield() # This is needed to update the GUI
+        return self.start_stop_camera_button.GetLabel() == 'Stop camera' or\
+            self.select_file_button.GetLabel() == 'Stop video'
 
 class DeviceMenuItem(wx.MenuItem):
     def __init__(self, parent, device_id, text):
