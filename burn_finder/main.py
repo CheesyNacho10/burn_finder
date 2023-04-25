@@ -1,6 +1,6 @@
 import wx
 import wx.lib.statbmp as statbmp
-import backend
+import frontend
 
 class WholeFrame(wx.Frame):
 
@@ -48,7 +48,7 @@ class WholeFrame(wx.Frame):
         # Device menu
         self.device_menu = wx.Menu()
 
-        self.avaliable_cams = backend.GetActualListCams()
+        self.avaliable_cams = frontend.GetActualListCams()
         self.device_items = []
 
         if len(self.avaliable_cams) == 0:
@@ -101,7 +101,7 @@ class WholeFrame(wx.Frame):
     def OnRenderTimer(self, event):
         if self.start_stop_camera_button.GetLabel() == 'Stop camera':
             if self.capture_stream is None:
-                self.capture_stream = backend.GetCameraInput(self.GetCameraIndex())
+                self.capture_stream = frontend.GetCameraInput(self.GetCameraIndex())
             is_reading, frame = self.capture_stream.read()
             if is_reading:
                 # Analize frame
