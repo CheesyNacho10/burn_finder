@@ -1,0 +1,3 @@
+DATASET IN THIS LINK:
+https://universe.roboflow.com/yingcai/skin_burn_detection/dataset/7
+
