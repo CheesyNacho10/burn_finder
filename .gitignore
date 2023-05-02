@@ -120,4 +120,4 @@ dmypy.json
 .pyre/
 
 *.mp4
-*.pt
+env
