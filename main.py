@@ -149,7 +149,7 @@ class WholeFrame(wx.Frame):
 
     def OnSelectImageFile(self, event):
         if not self.selected_buton:
-            self.selected_file = wx.FileSelector('Select image file', wildcard='Image files (*.jpg;*.png;*.bmp)|*.jpg;*.png;*.bmp')
+            self.selected_file = wx.FileSelector('Select image file', wildcard='Image files (*jpeg;*.jpg;*.png;*.bmp)|*.jpeg;*.jpg;*.png;*.bmp')
             if self.selected_file:
                 self.selected_buton = self.select_image_file_button
                 self.start_stop_camera_button.Disable()
